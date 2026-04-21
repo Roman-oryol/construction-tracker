@@ -15,7 +15,7 @@ class MaterialCreate(MaterialBase):
 class MaterialUpdate(BaseModel):
     name: str | None = None
     unit: str | None = None
-    low_strock_threshold: float | None = None
+    low_stock_threshold: float | None = None
     description: str | None = None
 
 
@@ -24,4 +24,4 @@ class MaterialResponse(MaterialBase):
 
     id: int
     project_id: int
-    current_stock: float
+    current_stock: float = 0
