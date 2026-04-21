@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from app.database import engine, Base
+from app.models.base import Base
+from app.database import engine
 from app.routers import materials
-from app.models import material, project
+import app.models
 
 
 @asynccontextmanager
