@@ -6,6 +6,8 @@ from app.models.base import Base
 
 if TYPE_CHECKING:
     from app.models.project import Project
+    from app.models.delivery import Delivery
+    from app.models.consumption import Consumption
 
 
 class Material(Base):
@@ -18,3 +20,5 @@ class Material(Base):
     description: Mapped[str | None] = mapped_column(Text)
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
     project: Mapped["Project"] = relationship(back_populates="materials")
+    deliveries: Mapped[list["Delivery"]] = relationship(back_populates="material")
+    consumptions: Mapped[list["Consumption"]] = relationship(back_populates="material")
