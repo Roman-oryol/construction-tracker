@@ -2,7 +2,12 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from app.models.base import Base
 from app.database import engine
-from app.routers import materials, projects, auth
+from app.routers import (
+    materials,
+    projects,
+    auth,
+    project_members,
+)
 
 
 @asynccontextmanager
@@ -17,6 +22,7 @@ app = FastAPI(title="Construction Material Tracker", lifespan=lifespan)
 app.include_router(materials.router)
 app.include_router(projects.router)
 app.include_router(auth.router)
+app.include_router(project_members.router)
 
 
 @app.get("/")
