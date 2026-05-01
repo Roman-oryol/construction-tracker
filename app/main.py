@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from app.models.base import Base
 from app.database import engine
 from app.routers import (
     materials,
@@ -11,11 +10,8 @@ from app.routers import (
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+async def lifespan(_app: FastAPI):
     yield
-
     await engine.dispose()
 
 
