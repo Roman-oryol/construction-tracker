@@ -6,6 +6,8 @@ from app.routers import (
     projects,
     auth,
     project_members,
+    deliveries,
+    consumptions,
 )
 
 
@@ -21,6 +23,8 @@ app.include_router(materials.router)
 app.include_router(projects.router)
 app.include_router(auth.router)
 app.include_router(project_members.router)
+app.include_router(deliveries.router)
+app.include_router(consumptions.router)
 
 
 @app.get("/")
