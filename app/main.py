@@ -16,6 +16,8 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(Base.metadata.create_all)
     yield
 
+    await engine.dispose()
+
 
 app = FastAPI(title="Construction Material Tracker", lifespan=lifespan)
 
