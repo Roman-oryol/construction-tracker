@@ -8,7 +8,12 @@ from app.models.consumption import Consumption
 from app.models.project import Project
 from app.models.project_member import ProjectMember, ProjectRole
 from app.models.user import User
-from app.schemas.material import MaterialCreate, MaterialUpdate, MaterialResponse
+from app.schemas.material import (
+    MaterialCreate,
+    MaterialUpdate,
+    MaterialResponse,
+    StockStatus,
+)
 from app.core.dependencies import get_current_user
 from app.routers.projects import _get_member_role
 
@@ -39,6 +44,14 @@ async def _calc_stock(material_id: int, db: AsyncSession) -> float:
     return float(deliveries or 0) - float(consumptions or 0)
 
 
+def _calc_status(stock: float, threshold: float) -> StockStatus:
+    if stock <= 0:
+        return StockStatus.critical
+    if stock < threshold:
+        return StockStatus.low
+    return StockStatus.ok
+
+
 @router.get("/", response_model=list[MaterialResponse])
 async def get_materials(
     project_id: int | None = None,
@@ -65,6 +78,7 @@ async def get_materials(
         stock = await _calc_stock(m.id, db)
         data = MaterialResponse.model_validate(m)
         data.current_stock = stock
+        data.stock_status = _calc_status(stock, m.low_stock_threshold)
         response.append(data)
     return response
 
@@ -82,6 +96,7 @@ async def get_material(
     stock = await _calc_stock(material_id, db)
     data = MaterialResponse.model_validate(material)
     data.current_stock = stock
+    data.stock_status = _calc_status(stock, material.low_stock_threshold)
     return data
 
 
@@ -103,6 +118,9 @@ async def create_material(
     await db.refresh(material)
     response = MaterialResponse.model_validate(material)
     response.current_stock = 0.0
+    response.stock_status = _calc_status(
+        response.current_stock, material.low_stock_threshold
+    )
     return response
 
 
@@ -127,6 +145,7 @@ async def update_material(
     stock = await _calc_stock(material_id, db)
     response = MaterialResponse.model_validate(material)
     response.current_stock = stock
+    response.stock_status = _calc_status(stock, material.low_stock_threshold)
     return response
 
 
