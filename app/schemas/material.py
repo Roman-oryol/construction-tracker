@@ -1,4 +1,11 @@
 from pydantic import BaseModel, ConfigDict
+from enum import Enum
+
+
+class StockStatus(str, Enum):
+    ok = "ok"
+    low = "low"
+    critical = "critical"
 
 
 class MaterialBase(BaseModel):
@@ -25,3 +32,4 @@ class MaterialResponse(MaterialBase):
     id: int
     project_id: int
     current_stock: float = 0
+    stock_status: StockStatus = StockStatus.ok
