@@ -6,7 +6,7 @@ from app.models.project_member import ProjectMember, ProjectRole
 from app.models.user import User
 from app.schemas.project_member import ProjectMemberAdd, ProjectMemberResponse
 from app.core.dependencies import get_current_user
-from app.routers.projects import _get_member_role
+from app.core.shortcuts import get_member_role
 
 router = APIRouter(prefix="/projects/{project_id}/members", tags=["project members"])
 
@@ -17,7 +17,7 @@ async def get_members(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    await _get_member_role(project_id, current_user.id, db)  # любая роль = доступ
+    await get_member_role(project_id, current_user.id, db)  # любая роль = доступ
     result = await db.execute(
         select(ProjectMember).where(ProjectMember.project_id == project_id)
     )
@@ -33,7 +33,7 @@ async def add_member(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    role = await _get_member_role(project_id, current_user.id, db)
+    role = await get_member_role(project_id, current_user.id, db)
     if role != ProjectRole.owner:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Only owner can add members"
@@ -73,7 +73,7 @@ async def update_member_role(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    role = await _get_member_role(project_id, current_user.id, db)
+    role = await get_member_role(project_id, current_user.id, db)
     if role != ProjectRole.owner:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Only owner can change roles"
@@ -108,7 +108,7 @@ async def remove_member(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    role = await _get_member_role(project_id, current_user.id, db)
+    role = await get_member_role(project_id, current_user.id, db)
     if role != ProjectRole.owner:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
