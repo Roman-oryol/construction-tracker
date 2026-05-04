@@ -15,19 +15,9 @@ from app.schemas.material import (
     StockStatus,
 )
 from app.core.dependencies import get_current_user
-from app.routers.projects import _get_member_role
+from app.core.shortcuts import get_material_or_404, get_member_role
 
 router = APIRouter(prefix="/materials", tags=["materials"])
-
-
-async def _get_material(material_id: int, db: AsyncSession) -> Material:
-    result = await db.execute(select(Material).where(Material.id == material_id))
-    material = result.scalar_one_or_none()
-    if not material:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Material not found"
-        )
-    return material
 
 
 async def _calc_stock(material_id: int, db: AsyncSession) -> float:
@@ -65,7 +55,7 @@ async def get_materials(
         .where(ProjectMember.user_id == current_user.id)
     )
     if project_id:
-        await _get_member_role(
+        await get_member_role(
             project_id, current_user.id, db
         )  # проверяем доступ к проекту
         query = query.where(Material.project_id == project_id)
@@ -89,8 +79,8 @@ async def get_material(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    material = await _get_material(material_id, db)
-    await _get_member_role(
+    material = await get_material_or_404(material_id, db)
+    await get_member_role(
         material.project_id, current_user.id, db
     )  # любая роль = доступ
     stock = await _calc_stock(material_id, db)
@@ -106,7 +96,7 @@ async def create_material(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    role = await _get_member_role(data.project_id, current_user.id, db)
+    role = await get_member_role(data.project_id, current_user.id, db)
     if role == ProjectRole.viewer:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Read-only access"
@@ -131,8 +121,8 @@ async def update_material(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    material = await _get_material(material_id, db)
-    role = await _get_member_role(material.project_id, current_user.id, db)
+    material = await get_material_or_404(material_id, db)
+    role = await get_member_role(material.project_id, current_user.id, db)
     if role == ProjectRole.viewer:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Read-only access"
@@ -155,8 +145,8 @@ async def delete_material(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    material = await _get_material(material_id, db)
-    role = await _get_member_role(material.project_id, current_user.id, db)
+    material = await get_material_or_404(material_id, db)
+    role = await get_member_role(material.project_id, current_user.id, db)
     if role == ProjectRole.viewer:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Read-only access"

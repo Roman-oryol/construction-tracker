@@ -9,8 +9,7 @@ from app.models.user import User
 from app.models.project_member import ProjectRole
 from app.schemas.delivery import DeliveryCreate, DeliveryResponse
 from app.core.dependencies import get_current_user
-from app.routers.materials import _get_material
-from app.routers.projects import _get_member_role
+from app.core.shortcuts import get_material_or_404, get_member_role
 
 router = APIRouter(prefix="/deliveries", tags=["deliveries"])
 
@@ -21,8 +20,8 @@ async def get_deliveries(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    material = await _get_material(material_id, db)
-    await _get_member_role(material.project_id, current_user.id, db)
+    material = await get_material_or_404(material_id, db)
+    await get_member_role(material.project_id, current_user.id, db)
 
     result = await db.execute(
         select(Delivery).where(Delivery.material_id == material_id)
@@ -36,8 +35,8 @@ async def create_delivery(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    material = await _get_material(data.material_id, db)
-    role = await _get_member_role(material.project_id, current_user.id, db)
+    material = await get_material_or_404(data.material_id, db)
+    role = await get_member_role(material.project_id, current_user.id, db)
 
     if role == ProjectRole.viewer:
         raise HTTPException(
@@ -72,8 +71,8 @@ async def delete_delivery(
             status_code=status.HTTP_404_NOT_FOUND, detail="Delivery not found"
         )
 
-    material = await _get_material(delivery.material_id, db)
-    role = await _get_member_role(material.project_id, current_user.id, db)
+    material = await get_material_or_404(delivery.material_id, db)
+    role = await get_member_role(material.project_id, current_user.id, db)
 
     if role == ProjectRole.viewer:
         raise HTTPException(
