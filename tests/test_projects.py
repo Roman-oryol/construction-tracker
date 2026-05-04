@@ -42,9 +42,10 @@ async def test_delete_project_forbidden_for_non_owner(client: AsyncClient):
     await client.post(
         "/auth/register", json={"email": "owner@test.com", "password": "pass123"}
     )
-    await client.post(
+    editor_r = await client.post(
         "/auth/register", json={"email": "editor@test.com", "password": "pass123"}
     )
+    editor_id = editor_r.json()["id"]
 
     r = await client.post(
         "/auth/login", data={"username": "owner@test.com", "password": "pass123"}
@@ -60,14 +61,9 @@ async def test_delete_project_forbidden_for_non_owner(client: AsyncClient):
     project_r = await client.post("/projects/", json={"name": "Тест проект"})
     project_id = project_r.json()["id"]
 
-    r = await client.get("/auth/register")
-
-    members_r = await client.get(f"/projects/{project_id}/members/")
-    owner_user_id = members_r.json()[0]["user_id"]
-
     await client.post(
         f"/projects/{project_id}/members/",
-        json={"user_id": 2, "role": "editor"},  # editor
+        json={"user_id": editor_id, "role": "editor"},
     )
 
     client.headers["Authorization"] = f"Bearer {editor_token}"

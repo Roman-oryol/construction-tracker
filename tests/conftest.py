@@ -1,32 +1,32 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.pool import NullPool
 
 from app.main import app
 from app.database import get_db
 from app.models.base import Base
 from app.core.config import settings
 
-# TEST_DATABASE_URL = (
-#     "postgresql+asyncpg://postgres:moyparol2022@localhost/construction_tracker_test"
-# )
-
-test_engine = create_async_engine(settings.test_database_url, echo=False)
-TestSessionLocal = async_sessionmaker(test_engine, expire_on_commit=False)
+TEST_DATABASE_URL = settings.test_database_url
 
 
-@pytest.fixture(scope="session", autouse=True)
-async def setup_database():
-    async with test_engine.begin() as conn:
+@pytest.fixture(scope="session")
+async def test_engine():
+    engine = create_async_engine(TEST_DATABASE_URL, poolclass=NullPool)
+
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    yield
-    async with test_engine.begin() as conn:
+
+    yield engine
+
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
-    await test_engine.dispose()
+    await engine.dispose()
 
 
 @pytest.fixture(autouse=True)
-async def clean_tables(setup_database):
+async def clean_tables(test_engine):
     yield
     async with test_engine.begin() as conn:
         for table in reversed(Base.metadata.sorted_tables):
@@ -34,8 +34,9 @@ async def clean_tables(setup_database):
 
 
 @pytest.fixture
-async def db_session():
-    async with TestSessionLocal() as session:
+async def db_session(test_engine):
+    session_factory = async_sessionmaker(test_engine, expire_on_commit=False)
+    async with session_factory() as session:
         yield session
 
 
