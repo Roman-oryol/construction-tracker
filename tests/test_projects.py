@@ -1,5 +1,13 @@
 from httpx import AsyncClient
 
+from tests.helpers import (
+    add_project_member,
+    authorize,
+    create_project,
+    login_user,
+    register_user,
+)
+
 
 async def test_create_project(auth_client: AsyncClient):
     response = await auth_client.post(
@@ -68,4 +76,32 @@ async def test_delete_project_forbidden_for_non_owner(client: AsyncClient):
 
     client.headers["Authorization"] = f"Bearer {editor_token}"
     response = await client.delete(f"/projects/{project_id}")
+    assert response.status_code == 403
+
+
+async def test_owner_can_delete_project(client: AsyncClient):
+    await register_user(client, "owner-delete@test.com")
+    owner_token = await login_user(client, "owner-delete@test.com")
+    authorize(client, owner_token)
+    project = await create_project(client, "Проект под удаление")
+
+    response = await client.delete(f"/projects/{project['id']}")
+    assert response.status_code == 204
+
+    response = await client.get(f"/projects/{project['id']}")
+    assert response.status_code == 404
+
+
+async def test_viewer_cannot_delete_project(client: AsyncClient):
+    await register_user(client, "owner-viewer-delete@test.com")
+    owner_token = await login_user(client, "owner-viewer-delete@test.com")
+    viewer = await register_user(client, "viewer-delete@test.com")
+    viewer_token = await login_user(client, "viewer-delete@test.com")
+
+    authorize(client, owner_token)
+    project = await create_project(client, "Viewer cannot delete")
+    await add_project_member(client, project["id"], viewer["id"], "viewer")
+
+    authorize(client, viewer_token)
+    response = await client.delete(f"/projects/{project['id']}")
     assert response.status_code == 403
