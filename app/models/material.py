@@ -20,5 +20,9 @@ class Material(Base):
     description: Mapped[str | None] = mapped_column(Text)
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
     project: Mapped["Project"] = relationship(back_populates="materials")
-    deliveries: Mapped[list["Delivery"]] = relationship(back_populates="material")
-    consumptions: Mapped[list["Consumption"]] = relationship(back_populates="material")
+    deliveries: Mapped[list["Delivery"]] = relationship(
+        back_populates="material", cascade="all, delete-orphan"
+    )
+    consumptions: Mapped[list["Consumption"]] = relationship(
+        back_populates="material", cascade="all, delete-orphan"
+    )
