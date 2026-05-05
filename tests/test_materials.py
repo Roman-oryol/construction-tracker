@@ -3,6 +3,8 @@
 import pytest
 from httpx import AsyncClient
 
+from tests.helpers import add_project_member, authorize, login_user, register_user
+
 
 @pytest.fixture
 async def project(auth_client: AsyncClient) -> dict:
@@ -156,6 +158,31 @@ async def test_create_material_requires_auth(
         json={"name": "Кирпич", "unit": "шт", "project_id": project_id},
     )
     assert response.status_code == 401
+
+
+async def test_viewer_cannot_create_material(
+    client: AsyncClient, auth_client: AsyncClient
+):
+    project_r = await auth_client.post(
+        "/projects/",
+        json={"name": "Viewer object"},
+    )
+    project_id = project_r.json()["id"]
+    owner_token = auth_client.headers["Authorization"].removeprefix("Bearer ")
+
+    viewer = await register_user(client, "viewer-material@test.com")
+    viewer_token = await login_user(client, "viewer-material@test.com")
+
+    authorize(client, owner_token)
+    await add_project_member(client, project_id, viewer["id"], "viewer")
+
+    authorize(client, viewer_token)
+    response = await client.post(
+        "/materials/",
+        json={"name": "Песок", "unit": "м3", "project_id": project_id},
+    )
+
+    assert response.status_code == 403
 
 
 async def test_cannot_access_other_users_material(client: AsyncClient, material: dict):
