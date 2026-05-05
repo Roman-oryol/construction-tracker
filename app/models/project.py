@@ -19,5 +19,9 @@ class Project(Base):
     description: Mapped[str | None] = mapped_column(Text, default=None)
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     owner: Mapped["User"] = relationship(back_populates="projects")
-    materials: Mapped[list["Material"]] = relationship(back_populates="project")
-    members: Mapped[list["ProjectMember"]] = relationship(back_populates="project")
+    materials: Mapped[list["Material"]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
+    )
+    members: Mapped[list["ProjectMember"]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
+    )
