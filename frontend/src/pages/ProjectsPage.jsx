@@ -47,6 +47,7 @@ export default function ProjectsPage() {
       setProjects((prev) => [...prev, response.data])
       setNewName('')
       setNewAddress('')
+      setNewDescription('')
       setShowForm(false)
     } catch (err) {
       setError('Не удалось создать проект')
