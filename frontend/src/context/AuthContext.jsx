@@ -18,6 +18,6 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={{ token, login, logout }}>{children}</AuthContext.Provider>
 }
 
-export function useAuth () {
-      return useContext(AuthContext)
+export function useAuth() {
+  return useContext(AuthContext)
 }
