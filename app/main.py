@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine
 from app.routers import (
     materials,
@@ -18,6 +19,15 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(title="Construction Material Tracker", lifespan=lifespan)
+
+# CORS — разрешаем запросы с фронтенда
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  
+    allow_credentials=True,
+    allow_methods=["*"],  
+    allow_headers=["*"],  
+)
 
 app.include_router(materials.router)
 app.include_router(projects.router)
