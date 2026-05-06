@@ -13,4 +13,17 @@ client.interceptors.request.use((config) => {
   return config
 })
 
+client.interceptors.response.use(
+  (response) => response, // если всё хорошо — просто возвращаем ответ
+  (error) => {
+    if (error.response?.status === 401) {
+      // Токен просрочен или невалиден — чистим localStorage
+      localStorage.removeItem('token')
+      // Перенаправляем на логин
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  },
+)
+
 export default client
