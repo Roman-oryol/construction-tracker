@@ -12,15 +12,15 @@ export default function Layout({ children }) {
   const activeProjectId = match ? parseInt(match[1]) : null
   const isOnProjects = location.pathname === '/projects'
 
-  const email = localStorage.getItem('userEmail') ?? ''
+  const displayName = localStorage.getItem('userDisplayName') ?? 'Пользователь'
 
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* ── Боковая панель ── */}
-      <aside className="w-56 min-h-screen bg-white shadow-sm flex flex-col flex-shrink-0">
+      <aside className="w-56 min-h-screen bg-white shadow-sm flex flex-col shrink-0">
         {/* Логотип */}
         <div className="px-4 py-5 border-b border-gray-200">
-          <h1 className="text-lg font-bold text-gray-800">БудТрекер</h1>
+          <h1 className="text-lg font-bold text-gray-800">Прораб</h1>
           <p className="text-xs text-gray-400 mt-0.5">Учёт материалов</p>
         </div>
 
@@ -61,14 +61,12 @@ export default function Layout({ children }) {
 
         {/* Пользователь + выход */}
         <div className="px-4 py-3 border-t border-gray-200">
-          {email && (
-            <p className="text-xs text-gray-500 mb-2 truncate" title={email}>
-              {email}
-            </p>
-          )}
+          <p className="text-sm text-gray-700 font-medium mb-1 truncate" title={displayName}>
+            {displayName}
+          </p>
           <button
             onClick={logout}
-            className="w-full text-left text-sm text-gray-400 hover:text-red-500 transition-colors"
+            className="text-sm text-gray-400 hover:text-red-500 transition-colors"
           >
             Выйти
           </button>

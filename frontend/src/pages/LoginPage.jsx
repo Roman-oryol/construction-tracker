@@ -19,7 +19,7 @@ export default function LoginPage() {
 
     try {
       const data = await apiLogin(email, password)
-      login(data.access_token, email)
+      login(data.access_token)
       navigate('/projects')
     } catch (err) {
       setError(err.response?.data?.detail ?? 'Ошибка входа')
@@ -30,49 +30,58 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-gray-800">Вход</h1>
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Прораб</h1>
+          <p className="text-gray-500 mt-2 text-sm">Учёт материалов на строительном объекте</p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+        <div className="bg-white p-8 rounded-xl shadow-md">
+          <h2 className="text-xl font-semibold mb-6 text-gray-800">Вход в систему</h2>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Пароль</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Пароль</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-          >
-            {loading ? 'Вход...' : 'Войти'}
-          </button>
-        </form>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
 
-        <p className="mt-4 text-sm text-gray-600">
-          Нет аккаунта?{' '}
-          <Link to="/register" className="text-blue-600 hover:underline">
-            Зарегистрироваться
-          </Link>
-        </p>
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors mt-1"
+            >
+              {loading ? 'Вход...' : 'Войти'}
+            </button>
+          </form>
+
+          <p className="mt-5 text-sm text-gray-600 text-center">
+            Нет аккаунта?{' '}
+            <Link to="/register" className="text-blue-600 hover:underline font-medium">
+              Зарегистрироваться
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   )
