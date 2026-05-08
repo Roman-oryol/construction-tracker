@@ -15,6 +15,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     hashed_password: Mapped[str] = mapped_column(String(255))
+    name: Mapped[str | None] = mapped_column(String(100))
 
     projects: Mapped[list["Project"]] = relationship(back_populates="owner")
     memberships: Mapped[list["ProjectMember"]] = relationship(back_populates="user")
