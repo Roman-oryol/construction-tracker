@@ -5,13 +5,15 @@ const AuthContext = createContext(null)
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem('token'))
 
-  const login = (accessToken) => {
+  const login = (accessToken, email) => {
     localStorage.setItem('token', accessToken)
+    if (email) localStorage.setItem('userEmail', email) // новая строка
     setToken(accessToken)
   }
 
   const logout = () => {
     localStorage.removeItem('token')
+    localStorage.removeItem('userEmail') // новая строка
     setToken(null)
   }
 

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import Layout from './components/Layout'
 
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
@@ -8,38 +9,47 @@ import ProjectsPage from './pages/ProjectsPage'
 import ProjectDetailPage from './pages/ProjectDetailPage'
 import MaterialDetailPage from './pages/MaterialDetailPage'
 
+// Все защищённые страницы получают Layout с сайдбаром
+function ProtectedLayout({ children }) {
+  return (
+    <ProtectedRoute>
+      <Layout>{children}</Layout>
+    </ProtectedRoute>
+  )
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Публичные маршруты */}
+          {/* Публичные маршруты — без Layout */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
-          {/* Защищённые маршруты */}
+          {/* Защищённые маршруты — с Layout */}
           <Route
             path="/projects"
             element={
-              <ProtectedRoute>
+              <ProtectedLayout>
                 <ProjectsPage />
-              </ProtectedRoute>
+              </ProtectedLayout>
             }
           />
           <Route
             path="/projects/:projectId"
             element={
-              <ProtectedRoute>
+              <ProtectedLayout>
                 <ProjectDetailPage />
-              </ProtectedRoute>
+              </ProtectedLayout>
             }
           />
           <Route
             path="/projects/:projectId/materials/:materialId"
             element={
-              <ProtectedRoute>
+              <ProtectedLayout>
                 <MaterialDetailPage />
-              </ProtectedRoute>
+              </ProtectedLayout>
             }
           />
 

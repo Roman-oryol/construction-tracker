@@ -19,7 +19,7 @@ export default function LoginPage() {
 
     try {
       const data = await apiLogin(email, password)
-      login(data.access_token)
+      login(data.access_token, email)
       navigate('/projects')
     } catch (err) {
       setError(err.response?.data?.detail ?? 'Ошибка входа')
