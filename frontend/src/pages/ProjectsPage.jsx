@@ -1,46 +1,35 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getProjects, createProject, deleteProject } from '../api/projects'
+import { createProject, deleteProject } from '../api/projects'
+import { useProjects } from '../context/ProjectsContext'
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  // Берём проекты и функцию обновления из контекста.
+  // Теперь после создания/удаления проекта достаточно вызвать
+  // refreshProjects() — и сайдбар обновится автоматически.
+  const { projects, refreshProjects } = useProjects()
 
   const [showForm, setShowForm] = useState(false)
   const [newName, setNewName] = useState('')
   const [newAddress, setNewAddress] = useState('')
   const [newDescription, setNewDescription] = useState('')
   const [creating, setCreating] = useState(false)
+  const [error, setError] = useState(null)
 
   const navigate = useNavigate()
-
-  useEffect(() => {
-    fetchProjects()
-  }, [])
-
-  const fetchProjects = async () => {
-    try {
-      setLoading(true)
-      const response = await getProjects()
-      setProjects(response.data)
-    } catch (err) {
-      setError('Не удалось загрузить проекты')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleCreate = async (e) => {
     e.preventDefault()
     setCreating(true)
     try {
-      const response = await createProject({
+      await createProject({
         name: newName,
         address: newAddress,
         description: newDescription,
       })
-      setProjects((prev) => [...prev, response.data])
+      // Вместо ручного обновления локального стейта — просто
+      // перезапрашиваем список. Обновятся и сайдбар, и эта страница.
+      await refreshProjects()
       setNewName('')
       setNewAddress('')
       setNewDescription('')
@@ -56,18 +45,10 @@ export default function ProjectsPage() {
     if (!confirm('Удалить проект?')) return
     try {
       await deleteProject(id)
-      setProjects((prev) => prev.filter((p) => p.id !== id))
+      await refreshProjects()
     } catch (err) {
       setError('Не удалось удалить проект')
     }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Загрузка...</p>
-      </div>
-    )
   }
 
   return (

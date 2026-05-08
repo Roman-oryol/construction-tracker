@@ -1,24 +1,18 @@
-import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { getProjects } from '../api/projects'
 import { useAuth } from '../context/AuthContext'
+import { useProjects } from '../context/ProjectsContext'
 
 export default function Layout({ children }) {
-  const [projects, setProjects] = useState([])
+  const { projects } = useProjects()
   const { logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
-  useEffect(() => {
-    getProjects()
-      .then((r) => setProjects(r.data))
-      .catch(() => {})
-  }, [])
-
-  // Определяем активный проект из URL вида /projects/3 или /projects/3/materials/1
   const match = location.pathname.match(/^\/projects\/(\d+)/)
   const activeProjectId = match ? parseInt(match[1]) : null
   const isOnProjects = location.pathname === '/projects'
+
+  const email = localStorage.getItem('userEmail') ?? ''
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -26,13 +20,12 @@ export default function Layout({ children }) {
       <aside className="w-56 min-h-screen bg-white shadow-sm flex flex-col flex-shrink-0">
         {/* Логотип */}
         <div className="px-4 py-5 border-b border-gray-200">
-          <h1 className="text-lg font-bold text-gray-800">СтройТрекер</h1>
+          <h1 className="text-lg font-bold text-gray-800">БудТрекер</h1>
           <p className="text-xs text-gray-400 mt-0.5">Учёт материалов</p>
         </div>
 
         {/* Навигация */}
         <nav className="flex-1 py-3 overflow-y-auto">
-          {/* Ссылка на все проекты */}
           <button
             onClick={() => navigate('/projects')}
             className={`w-full text-left px-4 py-2 text-sm transition-colors ${
@@ -44,7 +37,6 @@ export default function Layout({ children }) {
             Все объекты
           </button>
 
-          {/* Список проектов */}
           {projects.length > 0 && (
             <div className="mt-3">
               <p className="px-4 mb-1 text-xs font-medium text-gray-400 uppercase tracking-wide">
@@ -67,8 +59,13 @@ export default function Layout({ children }) {
           )}
         </nav>
 
-        {/* Кнопка выхода */}
+        {/* Пользователь + выход */}
         <div className="px-4 py-3 border-t border-gray-200">
+          {email && (
+            <p className="text-xs text-gray-500 mb-2 truncate" title={email}>
+              {email}
+            </p>
+          )}
           <button
             onClick={logout}
             className="w-full text-left text-sm text-gray-400 hover:text-red-500 transition-colors"
