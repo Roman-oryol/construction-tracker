@@ -1,6 +1,7 @@
 import client from './client'
 
-export const register = (email, password) => client.post('/auth/register', { email, password })
+export const register = (email, password, name = null) =>
+  client.post('/auth/register', { email, password })
 
 export const login = async (email, password) => {
   const form = new URLSearchParams()
